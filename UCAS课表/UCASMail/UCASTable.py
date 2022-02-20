@@ -107,7 +107,7 @@ class Table(object):
         return semesterTable
         
         
-def showWeekOfSemester(semesterYear=2021):
+def showWeekOfSemester(semesterYear=2022):
     """
     semesterYear是本学期开学的年份
     这个函数用于帮助用户查看学期第一周是本年的第几周。
