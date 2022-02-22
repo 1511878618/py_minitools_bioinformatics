@@ -7,6 +7,9 @@ import numpy as np
 import os
 import datetime
 
+# class userTable(object):
+#     def __init__(self):
+#         self.Table = pd.read_csv("user.csv",index = 0)
 ### 处理单个课程的数据类
 
 class course(object):
@@ -107,7 +110,7 @@ class Table(object):
         return semesterTable
         
         
-def showWeekOfSemester(semesterYear=2022):
+def showWeekOfSemester():
     """
     semesterYear是本学期开学的年份
     这个函数用于帮助用户查看学期第一周是本年的第几周。
@@ -121,9 +124,10 @@ def showWeekOfSemester(semesterYear=2022):
     
     i = todayIsocalendar[1]
     
+    semesterYear = eval(input("请输入开学年份（e.g:2022）："))
     print("今天的日期是：{}\t今天是今年的第{}个周{} ".format(today,todayIsocalendar[1],todayIsocalendar[2]))
     
-    a = eval(input("今天是本学期的第几周？:"))
+    a = eval(input("今天是本学期上课的的第几周？:"))
     
     out = i-a+1 
     weekStart = datetime.date.fromisocalendar(semesterYear,out,1)
@@ -156,36 +160,12 @@ def readUCASClassInfoFromFile(file):
     textsList = list(map(strip,textsList))
     return textsList
 
-#处理课程信息
-# def main_Type():
-#     usr = input('输入你的名字：')
-
-#     usrTablePath = 'table/'+usr
-#     courses = []
-#     try:
-#         os.makedirs(usrTablePath)
-#     except:
-#         pass
-#     while (True):
-#         tmpCourse = course()
-#         tmpCourse.getUCASInfo()
-#         courses.append(tmpCourse)
-#         flag = input("是否继续输入(y/n)")
-#         if flag == 'n':
-#             break
-#     #     print(tmpCourse.classPerWeek)
-#     #生成课表
-#     classTable = Table(courses)
-#     classTableList = classTable.generateTable()
-#     [y.to_csv(usrTablePath+"/{}周.csv".format(x+1),index=0) for x,y in zip(range(len(classTableList)),classTableList)]
-#     return classTableList
-
-
 
 def main(file):
     #处理用户信息，添加到数据库中
     usr = input('输入你的名字：')
     mail = input('输入你的邮箱：')
+
     try:
         usrData = pd.read_csv('user.csv')
         usrData = usrData.append({'userName': usr,"mailAddress": mail},ignore_index=True)
@@ -203,7 +183,7 @@ def main(file):
         pass
     textsList = readUCASClassInfoFromFile(file)
     for text in textsList:
-#         print(text)
+        print(text)
         tmpCourse = course()
         tmpCourse.getUCASInfo(INPUT=True,text=text)
         courses.append(tmpCourse)
@@ -226,4 +206,5 @@ else:
 ####over####
 
 ##主代码，需要修改输入~~~~~
-main("test.txt")
+
+main("courseInfo/xutingfeng.txt")

@@ -17,10 +17,10 @@ beginWeek = re.findall("周:\d*",info)[0].split(':')[1]
 
 ###获取第二天的日期
 today = datetime.datetime.today()
-
-targetweek = today.isocalendar()[1] - int(beginWeek)+1
+# targetweek = today.isocalendar()[1] - int(beginWeek)+1
 tomorrowDay  = today+datetime.timedelta(days=1)
 targetWeekNum = tomorrowDay.isocalendar()[2]
+targetweek = tomorrowDay.isocalendar()[1] - int(beginWeek) + 1 
 
 def turnChineseWeekToNumberWeek(chineseWeek):
     
@@ -43,6 +43,7 @@ def check(user):
 
     #获取第二天的课程
     path = 'table/''{}/'.format(user) + '{}周.csv'.format(targetweek)
+    print(path)
     test = pd.read_csv(path)
     print(targetWeekNum)
     # print(test.columns.drop('time')[targetWeekNum-1])
