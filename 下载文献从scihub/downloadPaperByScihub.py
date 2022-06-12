@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+# -*-coding:utf-8 -*-
+
 from scihub import SciHub
 
 sh = SciHub()
-
 
 def downloadPaperFromFile(fileName):
     
@@ -14,5 +16,8 @@ def downloadPaperFromFile(fileName):
             name = result['name']
             with open(name+'.pdf','wb') as f:
                 f.write(result['pdf'])
-                
+
+def main():
+    usage = 'usage: %prog [options] <paper> <seqs_bed_file> <seqs_hic_file>'
+       
 downloadPaperFromFile('paper.txt')

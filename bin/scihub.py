@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -27,7 +28,11 @@ logger.setLevel(logging.DEBUG)
 urllib3.disable_warnings()
 
 # constants
-SCHOLARS_BASE_URL = 'https://scholar.google.com/scholar'
+# SCHOLARS_BASE_URL = 'https://scholar.google.com/scholar'
+# SCHOLARS_BASE_URL = "https://scholar.lanfanshu.cn"
+SCHOLARS_BASE_URL = "https://scholar.google.com.hk/scholar"
+
+
 HEADERS = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:27.0) Gecko/20100101 Firefox/27.0'}
 
 class SciHub(object):
@@ -84,7 +89,6 @@ class SciHub(object):
         while True:
             try:
                 res = self.sess.get(SCHOLARS_BASE_URL, params={'q': query, 'start': start})
-
             except requests.exceptions.RequestException as e:
                 results['err'] = 'Failed to complete search with query %s (connection error)' % query
                 return results
@@ -94,6 +98,7 @@ class SciHub(object):
 
             if not papers:
                 if 'CAPTCHA' in str(res.content):
+                    print(res.url)
                     results['err'] = 'Failed to complete search with query %s (captcha)' % query
                 return results
 
@@ -250,7 +255,7 @@ class CaptchaNeedException(Exception):
 def main():
     sh = SciHub()
 
-    parser = argparse.ArgumentParser(description='SciHub - To remove all barriers in the way of science.')
+    parser = argparse.ArgumentParser(description='SciHub - To remove all barriers in the way of science.\r 由于谷歌的原因无法使用搜索；请不要使用:\r -s \r -sd ')
     parser.add_argument('-d', '--download', metavar='(DOI|PMID|URL)', help='tries to find and download the paper',
                         type=str)
     parser.add_argument('-f', '--file', metavar='path', help='pass file with list of identifiers and download each',
