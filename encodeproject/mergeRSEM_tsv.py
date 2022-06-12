@@ -36,10 +36,10 @@ def load_RSEM_tsvs(path="./", fields=["expected_count", "TPM", "FPKM"]):
     keys = ["gene_id", "transcript_id(s)"]
     colnames = keys + fields
     
-    resm_tsvpath = [os.path.join(path, i) for i in os.listdir(path) if ".tsv" in i and "meta" not in i]
+    RSEM_tsvpath = [os.path.join(path, i) for i in os.listdir(path) if ".tsv" in i and "meta" not in i]
     
-    resm_tsvsList = load_tsvs(resm_tsvpath, colnames)
-    return resm_tsvsList
+    RSEM_tsvsList = load_tsvs(RSEM_tsvpath, colnames)
+    return RSEM_tsvsList
 
 def RSEM2matrix(path="./", output="./"):
     fields = ["expected_count", "TPM", "FPKM"]
