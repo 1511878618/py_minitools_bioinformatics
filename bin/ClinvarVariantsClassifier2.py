@@ -98,7 +98,7 @@ def parse_clinvar_wanglab(filePath="Clinvar.vcf", outputPath="Clinvar_clena.txt"
 
 
 if __name__ == '__main__':
-    usage = "usage: %prog [options] <genome_hic_file> <seqs_bed_file> <seqs_hic_file>"
+    usage = "usage: %prog [options] <input> [output]"
     parser = OptionParser(usage)
     parser.add_option("-i", "--input", dest="data_filePath", help="Clinvar.vcf的路径", default="Clinvar.txt")
     parser.add_option("-o", "--output", dest="output_filePath", help="输出文件的路径", default="Clinvar_clean.txt")
@@ -107,6 +107,4 @@ if __name__ == '__main__':
 
     parse_clinvar_wanglab(options.data_filePath, options.output_filePath)
     print(f"成功完成转换啦，文件保存为{options.output_filePath}")
-
-
 
