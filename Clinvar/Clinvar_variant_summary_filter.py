@@ -54,7 +54,7 @@ def parase_variant_summary_data(inputPath, outputPath, star=2):
     data_GRCh38_nsSNV_star_binignOrPathogenic = data_GRCh38_nsSNV_star[data_GRCh38_nsSNV_star["ClinicalSignificance"].apply(choose_benignOrPathogenic)]  # ClinicalSignificance 是(Likely) Benign 或者 (Likely) Pathogenic的数据
 
     data_GRCh38_nsSNV_star_binignOrPathogenic.reset_index(drop=True)  # 重新设立index
-    data_GRCh38_nsSNV_star_binignOrPathogenic.to_csv(outputPath, header = 0)
+    data_GRCh38_nsSNV_star_binignOrPathogenic.to_csv(outputPath,index=0)
     return data_GRCh38_nsSNV_star_binignOrPathogenic
 
 if __name__ == '__main__':
