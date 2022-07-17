@@ -4,14 +4,17 @@ import json
 import os
 import threading
 import time
+import traceback
 from itertools import chain
+from multiprocessing import Pool, Process
 from optparse import OptionParser
 
 import httplib2
 import pandas as pd
 
 
-def download_ChrRange(chr="chr1", start=69000, end=70000, as_dataframe=False, GeneSymbol="unknown", **kwargs):
+
+def download_ChrRange(chr="chr1", start=69000, end=70000, as_dataframe=False, GeneSymbol="unknown", save_path = None, **kwargs):
     """
     download_ChrRange 从https://myvariant.info/v1/api#/整合数据库中获取指定基因组区域内所有SNP
 
@@ -47,8 +50,11 @@ def download_ChrRange(chr="chr1", start=69000, end=70000, as_dataframe=False, Ge
             pass 
 
         res, con = h.request('http://myvariant.info/v1/query', 'GET', params, headers=headers)
+        print(res)
         con = json.loads(con)
         hits.append(con["hits"])  # 添加下载到的数据到列表中保存
+        
+
 
         total = con["total"]  # 更新total
         gotsnps += len(con["hits"])  # 更新计数
@@ -66,9 +72,30 @@ def download_ChrRange(chr="chr1", start=69000, end=70000, as_dataframe=False, Ge
     hits = list(chain(*hits))  # 一定要加上list，否则会少一行？一个chain的bug?
 
     if as_dataframe:  # 输出df
-        return pd.json_normalize(hits)
+        hits = pd.json_normalize(hits)
+        if save_path != None:
+            hits.to_csv(f"{save_path}/{GeneSymbol}.csv", index=None)
+        else:
+            return hits
     else:
         return hits
+
+
+def downloadChrRange_passingParametes(dic):
+    download_ChrRange(**dic)
+
+def downloadChrRange_MultiProcessing(data, save_path="associateGeneRangeSNP",processes=4, email=None):
+    start_time = time.time()
+    pool = Pool(processes)
+    
+    kwargs_iter = [{**dict(as_dataframe=True,fetch_all=True, save_path=save_path, email=email), **values.to_dict()} for idx, values in data.iterrows()]
+    pool.map(downloadChrRange_passingParametes, iter(kwargs_iter))
+    pool.close()
+    pool.join()
+    end_time = time.time()
+    print(f"下载总共耗时:{end_time - start_time:.2f}s")
+
+
 
 
 def downloadAndSaveByBed(data, save_path, **kwargs):
@@ -93,9 +120,11 @@ def downloadAndSaveByBed(data, save_path, **kwargs):
             output = f"{save_path}/{genename}.csv"
             out = download_ChrRange(as_dataframe=True,fetch_all=True, **values.to_dict(), **kwargs)  # 获取染色体号、起始位置、终止位置作为输入
             out.to_csv(output, index=None)
+            del out
         except:
             error.append(genename)
             print(f"{genename} is wrong")
+            print(traceback.format_exc())
         time.sleep(3)
 
 
@@ -118,19 +147,22 @@ def downloadByThread(dataframe, threads_num=10, save_path="./associateGeneRangeS
 
     length = dataframe.shape[0]
     steps = length // threads_num 
-    threads = []
+    process = []
     for idx, i in enumerate(range(0, length, steps)):
         
         tmp_data = dataframe.iloc[i:i+steps, :]
-        thread = threading.Thread(
+        P = Process(
         target=downloadAndSaveByBed, 
         args=(tmp_data, save_path),
         kwargs=kwargs
         )
-        threads.append(thread)
+        process.append(P)
     
-    for thread in threads:
-        thread.start()
+    for P in process:
+        P.start()
+    for P in process:
+        P.join()
+    
 
 if __name__ == '__main__':
     usage = "usage: %prog <bed> <output> <threads num> <email>"
@@ -138,13 +170,22 @@ if __name__ == '__main__':
     parser = OptionParser(usage, )
     parser.add_option("-i", "--input", dest = "bed_file_path", default="Clinvar_SNP_Gene_full.bed", help="请输入要下载的包含感兴趣的基因组片段的bed文件")
     parser.add_option("-o", "--output", dest = "dir", default="associateGeneRangeSNP", help="指定输出保存目录，按bed文件第四列进行排列")
-    parser.add_option("-t", "--threads_num", dest="threads_num", default=10, type="int", help="使用的线程个数")
+    parser.add_option("-p", "--processes_num", dest="processes_num", default=5, type="int", help="使用的processes个数")
     parser.add_option("-m", "--email", dest="email", default=None, type="str", help="指定邮箱")
     (options, args) = parser.parse_args()
 
     email = options.email
     bed = pd.read_csv(options.bed_file_path, names=["chr", "start", "end", "GeneSymbol"], sep="\t")
-    dir = options.dir  # 保存目录 
-    print(f"saveing file to {dir}, please check")
-    downloadByThread(bed, threads_num=options.threads_num, save_path=dir, email="xutingfeng@big.ac.cn")
+    try:
+        os.mkdir(options.dir)
+    except:
+        pass
+
+    
+
+    # dir = options.dir  # 保存目录 
+    print(f"saveing file to {options.dir}, please check")
+    downloadChrRange_MultiProcessing(bed, processes=options.processes_num, save_path=options.dir, email=options.email)
+
+
     print(f"finish downloading.......")
